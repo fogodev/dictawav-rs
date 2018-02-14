@@ -1,4 +1,5 @@
 pub mod wav_handler;
+pub mod preprocessor;
 
 #[cfg(test)]
 mod tests {

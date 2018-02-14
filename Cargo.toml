@@ -5,6 +5,8 @@ authors = ["Ericson \"Fogo\" Soares <ericson.ds999@gmail.com>"]
 
 [dependencies]
 hound = "3.3"
+rustfft = "2.*"
+rustdct = "0.1.*"
 
 [lib]
 name = "dictawav"
