@@ -1,5 +1,6 @@
-pub mod wav_handler;
-pub mod preprocessor;
+mod wav_handler;
+mod preprocessor;
+mod kernelcanvas;
 
 #[cfg(test)]
 mod tests {
