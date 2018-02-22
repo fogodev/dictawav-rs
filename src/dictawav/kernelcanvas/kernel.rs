@@ -27,7 +27,7 @@ pub struct KernelBuilder {
 
 impl KernelBuilder {
     pub fn new(dimension: usize) -> KernelBuilder {
-        let range = Range::new(-1f32, 1f32 + f32::MIN);
+        let range = Range::new(-1f32, 1f32 + f32::MIN_POSITIVE);
         let random_generator = rand::thread_rng();
 
         KernelBuilder {

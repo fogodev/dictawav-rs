@@ -8,6 +8,7 @@ hound = "3.3"
 rustfft = "2.*"
 rustdct = "0.1.*"
 rand = "0.4"
+structopt = "0.2.3"
 
 [lib]
 name = "dictawav"

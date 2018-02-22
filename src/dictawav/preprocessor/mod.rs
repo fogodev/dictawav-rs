@@ -7,7 +7,7 @@ use self::mfcc::MFCC;
 
 type Frame = Vec<f32>;
 
-struct PreProcessor {
+pub struct PreProcessor {
     sample_rate: usize,
     samples_per_frame: usize,
     processed_frames: Vec<Frame>,
@@ -96,6 +96,10 @@ impl PreProcessor {
         self.check_fill_and_add_incomplete_frame(second_frame);
         self.check_fill_and_add_incomplete_frame(third_frame_first_half);
         self.check_fill_and_add_incomplete_frame(third_frame_complete);
+    }
+
+    pub fn extract_processed_frames(self) -> Vec<Frame> {
+        self.processed_frames
     }
 
     #[inline]
