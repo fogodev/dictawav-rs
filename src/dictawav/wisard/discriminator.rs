@@ -1,20 +1,21 @@
+use std::rc::Rc;
 use super::ram::Ram;
 
-pub struct Discriminator<'a> {
+pub struct Discriminator {
     retina_size: usize,
     ram_num_bits: usize,
     rams_count: usize,
     rams: Vec<Ram>,
-    ram_address_mapping: &'a Vec<usize>,
+    ram_address_mapping: Rc<Vec<usize>>,
 }
 
-impl<'a> Discriminator<'a> {
+impl Discriminator {
     pub fn new(
         retina_size: usize,
         ram_num_bits: usize,
-        ram_address_mapping: &'a Vec<usize>,
+        ram_address_mapping: Rc<Vec<usize>>,
         is_cumulative: bool,
-    ) -> Discriminator<'a> {
+    ) -> Discriminator {
         if ram_num_bits > 62usize {
             panic!("WiSARD ERROR: Representation overflow due to number of bits");
         }
@@ -83,6 +84,50 @@ impl<'a> Discriminator<'a> {
                 base *= 2usize;
             }
             self.rams[ram_index + 1].insert(address);
+        }
+    }
+
+    pub fn forget(&mut self, retina: &Vec<bool>) {
+        let mut address: usize;
+        let mut base: usize;
+        let mut ram_index = 0usize;
+        let mut index = 0usize;
+
+        // Each group os ram_num_bits is related with a ram
+        while index <= (self.retina_size - self.ram_num_bits) {
+            address = 0usize;
+            base = 1usize;
+
+            for bit_index in 0..self.ram_num_bits {
+                if retina[self.ram_address_mapping[index + bit_index]] {
+                    address += base;
+                }
+                base *= 2usize;
+            }
+
+            ram_index = index / self.ram_num_bits;
+            self.rams[ram_index].remove(address);
+
+            index += self.ram_num_bits;
+        }
+
+        // The remaining retina when retina length isn't a multiple of ram_num_bits
+        let rest_of_positions = self.retina_size % self.ram_num_bits;
+        if rest_of_positions != 0usize {
+            address = 0usize;
+            base = 1usize;
+
+            for bit_index in 0..rest_of_positions {
+                if retina[
+                    self.ram_address_mapping[
+                        self.retina_size - rest_of_positions - 1usize + bit_index
+                        ]
+                    ] {
+                    address += base;
+                }
+                base *= 2usize;
+            }
+            self.rams[ram_index + 1].remove(address);
         }
     }
 

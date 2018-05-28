@@ -8,7 +8,6 @@ use self::mfcc::MFCC;
 type Frame = Vec<f32>;
 
 pub struct PreProcessor {
-    sample_rate: usize,
     samples_per_frame: usize,
     processed_frames: Vec<Frame>,
     fft_handler: FFTHandler,
@@ -32,7 +31,6 @@ impl PreProcessor {
         );
 
         PreProcessor {
-            sample_rate,
             samples_per_frame,
             processed_frames,
             fft_handler,

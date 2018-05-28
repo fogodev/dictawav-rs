@@ -30,6 +30,18 @@ impl Ram {
         }
     }
 
+    pub fn remove(&mut self, address: usize) {
+        if address > self.max_address {
+            panic!("WiSARD Error: Invalid address to add value");
+        }
+
+        if !self.is_cumulative {
+            self.data.insert(address, 0);
+        } else {
+            *self.data.entry(address).or_insert(1) -= 1;
+        }
+    }
+
     pub fn get(&self, address: usize) -> u64 {
         match self.data.get(&address) {
             Some(value) => *value,

@@ -3,22 +3,23 @@ extern crate rand;
 mod ram;
 mod discriminator;
 
+use std::rc::Rc;
 use std::collections::hash_map::HashMap;
 use self::rand::Rng;
 use self::discriminator::Discriminator;
 
-pub struct Wisard<'a> {
+pub struct Wisard {
     retina_size: usize,
     ram_num_bits: usize,
     use_bleaching: bool,
     minimum_confidence: f64,
     bleaching_threshold: u64,
     is_cumulative: bool,
-    discriminators: HashMap<String, Discriminator<'a>>,
-    ram_address_mapping: Vec<usize>,
+    discriminators: HashMap<String, Discriminator>,
+    ram_address_mapping: Rc<Vec<usize>>,
 }
 
-impl<'a> Wisard<'a> {
+impl Wisard {
     pub fn new(
         retina_size: usize,
         ram_num_bits: usize,
@@ -27,13 +28,15 @@ impl<'a> Wisard<'a> {
         bleaching_threshold: u64,
         randomize_positions: bool,
         is_cumulative: bool,
-    ) -> Wisard<'a> {
+    ) -> Wisard {
         let discriminators = HashMap::new();
-        let mut ram_address_mapping: Vec<usize> = (0..retina_size).collect();
+        let mut ram_address_mapping =  (0..retina_size).collect::<Vec<usize>>();
 
         if randomize_positions {
             rand::thread_rng().shuffle(&mut ram_address_mapping);
         }
+
+        let ram_address_mapping = Rc::new(ram_address_mapping);
 
         Wisard {
             retina_size,
@@ -47,14 +50,20 @@ impl<'a> Wisard<'a> {
         }
     }
 
-    pub fn train(&'a mut self, class_name: String, retina: &Vec<bool>) {
+    pub fn train(&mut self, class_name: String, retina: &Vec<bool>) {
         // Checking if class name exist before creating a new one
         self.discriminators.entry(class_name).or_insert(Discriminator::new(
             self.retina_size,
             self.ram_num_bits,
-            &self.ram_address_mapping,
+            self.ram_address_mapping.clone(),
             self.is_cumulative,
         )).train(retina);
+    }
+
+    pub fn forget(&mut self, class_name: String, retina: &Vec<bool>) {
+        if let Some(discriminator) = self.discriminators.get_mut(&class_name) {
+            discriminator.forget(retina);
+        }
     }
 
     pub fn classification_probabilities(&self, retina: &Vec<bool>) -> HashMap<String, f64> {
