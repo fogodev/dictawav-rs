@@ -1,6 +1,6 @@
 mod kernel;
 
-use std::f32;
+use std::f64;
 use self::kernel::Kernel;
 use self::kernel::KernelBuilder;
 
@@ -11,7 +11,7 @@ pub struct KernelCanvas {
     kernel_builder: KernelBuilder,
     kernels: Vec<Kernel>,
     active_kernels: Vec<bool>,
-    processed_frames: Vec<Vec<f32>>,
+    processed_frames: Vec<Vec<f64>>,
 }
 
 impl KernelCanvas {
@@ -36,7 +36,7 @@ impl KernelCanvas {
         }
     }
 
-    pub fn process(&mut self, frames: Vec<Vec<f32>>) {
+    pub fn process(&mut self, frames: Vec<Vec<f64>>) {
 
         // Cleaning current canvas
         self.processed_frames = Vec::new();
@@ -59,7 +59,7 @@ impl KernelCanvas {
         painted_canvas
     }
 
-    fn append_sum(&mut self, frames: Vec<Vec<f32>>) {
+    fn append_sum(&mut self, frames: Vec<Vec<f64>>) {
 
         // First frame is a special case
         let mut first_frame = frames[0].clone();
@@ -85,8 +85,8 @@ impl KernelCanvas {
         let mut processed = Vec::with_capacity(processed_frames_count);
         let doubled_kernel_dimension = self.kernel_dimension * 2usize;
 
-        let mut means = vec![0f32; doubled_kernel_dimension];
-        let mut std_deviations = vec![0f32; doubled_kernel_dimension];
+        let mut means = vec![0f64; doubled_kernel_dimension];
+        let mut std_deviations = vec![0f64; doubled_kernel_dimension];
 
         for frame in self.processed_frames.iter() {
             for (index, num) in means.iter_mut().enumerate() {
@@ -95,17 +95,17 @@ impl KernelCanvas {
         }
 
         for mean in means.iter_mut() {
-            *mean /= processed_frames_count as f32; // Calculating the mean of each dimension
+            *mean /= processed_frames_count as f64; // Calculating the mean of each dimension
         }
 
         for frame in self.processed_frames.iter() {
             for (index, num) in std_deviations.iter_mut().enumerate() {
-                *num += (frame[index] - means[index]).powf(2f32);
+                *num += (frame[index] - means[index]).powf(2f64);
             }
         }
 
         for std_deviation in std_deviations.iter_mut() {
-            *std_deviation /= (processed_frames_count - 1usize) as f32;
+            *std_deviation /= (processed_frames_count - 1usize) as f64;
         }
 
         for frame in self.processed_frames.iter() {
@@ -126,19 +126,19 @@ impl KernelCanvas {
 
         // "Replicating features" on the first frame just fill it with zeros
         for _ in 0..doubled_kernel_dimension {
-            self.processed_frames[0].push(0f32);
+            self.processed_frames[0].push(0f64);
         }
 
         for index in 1..self.processed_frames.len() {
-            let previous_frame: Vec<f32> = self.processed_frames[index - 1].iter().take(doubled_kernel_dimension).cloned().collect();
+            let previous_frame: Vec<f64> = self.processed_frames[index - 1].iter().take(doubled_kernel_dimension).cloned().collect();
             self.processed_frames[index].extend(previous_frame.into_iter());
         }
     }
 
-    fn get_nearest_kernel_index(&self, frame: Vec<f32>) -> usize {
+    fn get_nearest_kernel_index(&self, frame: Vec<f64>) -> usize {
         let current_kernel = self.kernel_builder.build_from_coordinates(frame);
         let mut nearest_kernel_index = 0usize;
-        let mut nearest_kernel_distance = f32::MAX;
+        let mut nearest_kernel_distance = f64::MAX;
 
         for index in 0..self.kernel_count {
             let distance = self.kernels[index].check_distance_squared(&current_kernel);

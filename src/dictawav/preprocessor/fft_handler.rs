@@ -6,30 +6,30 @@ use self::rustfft::num_complex::Complex;
 use self::rustfft::num_traits::Zero;
 
 pub struct FFTHandler {
-    fft: Radix4<f32>,
+    fft: Radix4<f64>,
     size: usize,
-    input: Vec<Complex<f32>>,
-    output: Vec<Complex<f32>>,
+    input: Vec<Complex<f64>>,
+    output: Vec<Complex<f64>>,
 }
 
 impl FFTHandler {
     pub fn new(size: usize) -> FFTHandler {
         let fft = Radix4::new(size, false);
-        let input: Vec<Complex<f32>> = Vec::with_capacity(size);
-        let output: Vec<Complex<f32>> = vec![Complex::zero(); size];
+        let input: Vec<Complex<f64>> = Vec::with_capacity(size);
+        let output: Vec<Complex<f64>> = vec![Complex::zero(); size];
 
         FFTHandler { fft, size, input, output }
     }
 
-    pub fn process(&mut self, input: Vec<f32>) -> Vec<f32> {
+    pub fn process(&mut self, input: Vec<f64>) -> Vec<f64> {
         for num in input.into_iter() {
-            self.input.push(Complex::new(num, 0f32))
+            self.input.push(Complex::new(num, 0f64))
         }
 
         self.fft.process(&mut self.input, &mut self.output);
 
         // ToDo Check output
-        let output: Vec<f32> = self.output
+        let output: Vec<f64> = self.output
                                    .iter()
                                    .map(
                                        |complex|

@@ -21,8 +21,9 @@ impl Discriminator {
         }
         let rams_count = (retina_size as f64 / ram_num_bits as f64).ceil() as usize;
         let mut rams = Vec::with_capacity(rams_count);
+        let rest = retina_size % ram_num_bits;
 
-        if retina_size % ram_num_bits == 0 {
+        if rest == 0 {
             for _ in 0..rams_count {
                 rams.push(Ram::new(ram_num_bits, is_cumulative));
             }
@@ -31,7 +32,7 @@ impl Discriminator {
                 rams.push(Ram::new(ram_num_bits, is_cumulative));
             }
             // The remaining smaller ram
-            rams.push(Ram::new(retina_size % ram_num_bits, is_cumulative));
+            rams.push(Ram::new(rest, is_cumulative));
         }
 
         Discriminator {
@@ -47,10 +48,9 @@ impl Discriminator {
         let mut address: usize;
         let mut base: usize;
         let mut ram_index = 0usize;
-        let mut index = 0usize;
 
         // Each group os ram_num_bits is related with a ram
-        while index <= (self.retina_size - self.ram_num_bits) {
+        for index in (0..(self.retina_size - self.ram_num_bits + 1)).step_by(self.ram_num_bits) {
             address = 0usize;
             base = 1usize;
 
@@ -63,8 +63,6 @@ impl Discriminator {
 
             ram_index = index / self.ram_num_bits;
             self.rams[ram_index].insert(address);
-
-            index += self.ram_num_bits;
         }
 
         // The remaining retina when retina length isn't a multiple of ram_num_bits
@@ -91,10 +89,9 @@ impl Discriminator {
         let mut address: usize;
         let mut base: usize;
         let mut ram_index = 0usize;
-        let mut index = 0usize;
 
         // Each group os ram_num_bits is related with a ram
-        while index <= (self.retina_size - self.ram_num_bits) {
+        for index in (0..(self.retina_size - self.ram_num_bits + 1)).step_by(self.ram_num_bits) {
             address = 0usize;
             base = 1usize;
 
@@ -107,8 +104,6 @@ impl Discriminator {
 
             ram_index = index / self.ram_num_bits;
             self.rams[ram_index].remove(address);
-
-            index += self.ram_num_bits;
         }
 
         // The remaining retina when retina length isn't a multiple of ram_num_bits
@@ -137,8 +132,7 @@ impl Discriminator {
         let mut base: usize;
         let mut result = Vec::with_capacity(self.rams_count);
 
-        let mut index = 0usize;
-        while index <= (self.retina_size - self.ram_num_bits) {
+        for index in (0..(self.retina_size - self.ram_num_bits + 1)).step_by(self.ram_num_bits) {
             address = 0usize;
             base = 1usize;
 
@@ -151,8 +145,6 @@ impl Discriminator {
 
             ram_index = index / self.ram_num_bits;
             result.push(self.rams[ram_index].get(address));
-
-            index += self.ram_num_bits;
         }
 
         let rest_of_positions = self.retina_size % self.ram_num_bits;

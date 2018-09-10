@@ -38,7 +38,14 @@ impl Ram {
         if !self.is_cumulative {
             self.data.insert(address, 0);
         } else {
-            *self.data.entry(address).or_insert(1) -= 1;
+            self.data.entry(address).and_modify(
+                |val|
+                    if *val > 0 {
+                        *val -= 1
+                    } else {
+                        *val = 0
+                    }
+            ).or_insert(0);
         }
     }
 

@@ -4,7 +4,7 @@ use self::rustdct::dct2::{DCT2, DCT2ViaFFT};
 use self::rustdct::rustfft::FFTplanner;
 
 pub struct DCTHandler {
-    dct: DCT2ViaFFT<f32>,
+    dct: DCT2ViaFFT<f64>,
     size: usize,
 }
 
@@ -16,8 +16,8 @@ impl DCTHandler {
         DCTHandler { dct, size }
     }
 
-    pub fn process(&mut self, mut input: Vec<f32>) -> Vec<f32> {
-        let mut output = vec![0f32; self.size];
+    pub fn process(&mut self, mut input: Vec<f64>) -> Vec<f64> {
+        let mut output = vec![0f64; self.size];
 
         self.dct.process(&mut input, &mut output);
 

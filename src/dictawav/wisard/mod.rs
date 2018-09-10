@@ -136,8 +136,7 @@ impl Wisard {
 
             // If no ram recognizes the pattern, return previous results
             if max_value <= 0.000001 {
-                bleached_results = results;
-                break;
+                return results;
             }
 
             current_bleaching_threshold += 1u64;
@@ -151,7 +150,7 @@ impl Wisard {
         &self,
         classifications_probabilities: &HashMap<String, f64>,
     ) -> (f64, (String, f64)) {
-        let mut best_class_name = &String::from("");
+        let mut best_class_name = &String::new();
         let mut max = 0f64;
         let mut second_max = 0f64;
 
@@ -165,7 +164,7 @@ impl Wisard {
             }
         }
 
-        let confidence = if max != 0f64 { (max - second_max) / max } else { 0f64 };
+        let confidence = if max != 0f64 { 1f64 - (second_max) / max } else { 0f64 };
 
         (confidence, (best_class_name.clone(), max))
     }

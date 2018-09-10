@@ -1,11 +1,11 @@
 mod fft_handler;
 mod mfcc;
 
-use std::f32;
+use std::f64;
 use self::fft_handler::FFTHandler;
 use self::mfcc::MFCC;
 
-type Frame = Vec<f32>;
+type Frame = Vec<f64>;
 
 pub struct PreProcessor {
     samples_per_frame: usize,
@@ -21,7 +21,7 @@ impl PreProcessor {
         let processed_frames: Vec<Frame> = Vec::new();
         let fft_handler = FFTHandler::new(samples_per_frame);
         let filterbank_count = 26usize;
-        let lowest_frequency = 0f32;
+        let lowest_frequency = 0f64;
         let highest_frequency = PreProcessor::get_highest_frequency(sample_rate);
         let mfcc = MFCC::new(filterbank_count,
                              sample_rate,
@@ -38,7 +38,7 @@ impl PreProcessor {
         }
     }
 
-    pub fn process(&mut self, audio_data: Vec<f32>) {
+    pub fn process(&mut self, audio_data: Vec<f64>) {
         let frame_mid_point = self.samples_per_frame / 2usize;
 
         let mut first_frame = Frame::with_capacity(self.samples_per_frame);
@@ -110,7 +110,7 @@ impl PreProcessor {
     }
 
     #[inline]
-    fn push_windowed_sample(&self, sample: f32, frame: &mut Frame) {
+    fn push_windowed_sample(&self, sample: f64, frame: &mut Frame) {
         let length = frame.len();
         frame.push(sample * self.hann_window_funcion(length));
     }
@@ -119,15 +119,15 @@ impl PreProcessor {
     fn check_fill_and_add_incomplete_frame(&mut self, mut frame: Frame) {
         if !frame.is_empty() {
             while frame.len() < self.samples_per_frame {
-                frame.push(0f32);
+                frame.push(0f64);
             }
             self.process_and_add_frame(frame);
         }
     }
 
     #[inline]
-    fn hann_window_funcion(&self, index: usize) -> f32 {
-        0.5f32 * (1f32 - ((2f32 * f32::consts::PI * index as f32) / self.samples_per_frame as f32).cos())
+    fn hann_window_funcion(&self, index: usize) -> f64 {
+        0.5f64 * (1f64 - ((2f64 * f64::consts::PI * index as f64) / self.samples_per_frame as f64).cos())
     }
 
     #[inline]
@@ -140,8 +140,8 @@ impl PreProcessor {
     }
 
     #[inline]
-    fn get_highest_frequency(sample_rate: usize) -> f32 {
-        sample_rate as f32 / 2f32
+    fn get_highest_frequency(sample_rate: usize) -> f64 {
+        sample_rate as f64 / 2f64
     }
 }
 

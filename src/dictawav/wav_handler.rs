@@ -69,8 +69,8 @@ impl WavHandler {
     }
 
     /// Extract the audio data, consuming the handler in process
-    pub fn extract_audio_data(self) -> Vec<f32> {
-        self.audio_data
+    pub fn extract_audio_data(self) -> Vec<f64> {
+        self.audio_data.into_iter().map(|data| data as f64).collect::<Vec<f64>>()
     }
 
     /// Get the sample rate from wav file
