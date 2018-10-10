@@ -44,7 +44,7 @@ impl Discriminator {
         }
     }
 
-    pub fn train(&mut self, retina: &Vec<bool>) {
+    pub fn train(&mut self, retina: &[bool]) {
         let mut address: usize;
         let mut base: usize;
         let mut ram_index = 0usize;
@@ -85,7 +85,7 @@ impl Discriminator {
         }
     }
 
-    pub fn forget(&mut self, retina: &Vec<bool>) {
+    pub fn forget(&mut self, retina: &[bool]) {
         let mut address: usize;
         let mut base: usize;
         let mut ram_index = 0usize;
@@ -126,7 +126,7 @@ impl Discriminator {
         }
     }
 
-    pub fn classify(&self, retina: &Vec<bool>) -> Vec<u64> {
+    pub fn classify(&self, retina: &[bool]) -> Vec<u64> {
         let mut ram_index = 0usize;
         let mut address: usize;
         let mut base: usize;

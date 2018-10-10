@@ -11,7 +11,7 @@ pub struct WavHandler {
     /// Specification of the file
     wav_spec: hound::WavSpec,
     /// Store of file's data
-    audio_data: Vec<f32>,
+    audio_data: Vec<f64>,
 }
 
 impl WavHandler {
@@ -21,28 +21,28 @@ impl WavHandler {
         let mut wav_reader = hound::WavReader::open(filename)?;
         let wav_spec = wav_reader.spec();
 
-        let mut audio_data: Vec<f32> = match wav_spec.sample_format {
+        let mut audio_data: Vec<f64> = match wav_spec.sample_format {
             hound::SampleFormat::Float => wav_reader.samples::<f32>().map(
-                |sample| sample.unwrap()
+                |sample| f64::from(sample.unwrap())
             ).collect(),
             hound::SampleFormat::Int => {
                 match wav_spec.bits_per_sample {
                     8u16 => wav_reader.samples::<i8>()
                                       .map(
                                           |sample|
-                                              (sample.unwrap() as f32) * (1f32 / (i8::MAX as f32 + 1f32))
+                                              f64::from(sample.unwrap()) * (1f64 / (f64::from(i8::MAX) + 1f64))
                                       ).collect(),
 
                     16u16 => wav_reader.samples::<i16>()
                                        .map(
                                            |sample|
-                                               (sample.unwrap() as f32) * (1f32 / (i16::MAX as f32 + 1f32))
+                                               f64::from(sample.unwrap()) * (1f64 / (f64::from(i16::MAX) + 1f64))
                                        ).collect(),
 
                     32u16 => wav_reader.samples::<i32>()
                                        .map(
                                            |sample|
-                                               (sample.unwrap() as f32) * (1f32 / (i32::MAX as f32 + 1f32))
+                                               f64::from(sample.unwrap()) * (1f64 / (f64::from(i32::MAX) + 1f64))
                                        ).collect(),
 
                     _ => return Err(hound::Error::Unsupported)
@@ -51,26 +51,26 @@ impl WavHandler {
         };
 
         if wav_spec.channels > 1u16 {
-            audio_data = WavHandler::convert_to_mono(wav_spec.channels, audio_data);
+            audio_data = WavHandler::convert_to_mono(wav_spec.channels, &audio_data);
         }
 
         Ok(WavHandler { wav_spec, audio_data })
     }
 
     // Convert a audio data with multiple channels to mono
-    fn convert_to_mono(channels: u16, audio_data: Vec<f32>) -> Vec<f32> {
-        let mut new_data: Vec<f32> = Vec::with_capacity((audio_data.len() as f32 / channels as f32) as usize);
+    fn convert_to_mono(channels: u16, audio_data: &[f64]) -> Vec<f64> {
+        let mut new_data: Vec<f64> = Vec::with_capacity((audio_data.len() as f64 / f64::from(channels)) as usize);
         audio_data.chunks(channels as usize)
                   .for_each(
                       |chunk|
-                          new_data.push(chunk.iter().sum::<f32>() / channels as f32)
+                          new_data.push(chunk.iter().sum::<f64>() / f64::from(channels))
                   );
         new_data
     }
 
     /// Extract the audio data, consuming the handler in process
     pub fn extract_audio_data(self) -> Vec<f64> {
-        self.audio_data.into_iter().map(|data| data as f64).collect::<Vec<f64>>()
+        self.audio_data
     }
 
     /// Get the sample rate from wav file

@@ -1,7 +1,6 @@
 mod dct_handler;
 
 use self::dct_handler::DCTHandler;
-use super::Frame;
 
 pub struct MFCC {
     filterbank_count: usize,
@@ -36,21 +35,21 @@ impl MFCC {
         mfcc
     }
 
-    pub fn compute(&mut self, frame: Frame) -> Frame {
+    pub fn compute(&mut self, frame: &[f64]) -> Vec<f64> {
         let mut filtered_values = vec![0f64; self.filterbank_count];
 
         let mut current_filter = 0usize;
-        for fb in self.filterbank.iter() {
+        for fb in &self.filterbank {
             let begin = fb[0];
             let mid = fb[1];
             let end = fb[2];
 
-            for pos in begin..mid {
-                filtered_values[current_filter] += frame[pos] * (pos - begin) as f64 / (mid - begin) as f64;
+            for (pos, value) in frame.iter().enumerate().take(mid).skip(begin) {
+                filtered_values[current_filter] += value * (pos - begin) as f64 / (mid - begin) as f64;
             }
 
-            for pos in mid..end {
-                filtered_values[current_filter] += frame[pos] * (end - pos) as f64 / (end - mid) as f64;
+            for (pos, value) in frame.iter().enumerate().take(end).skip(mid) {
+                filtered_values[current_filter] += value * (end - pos) as f64 / (end - mid) as f64;
             }
 
             current_filter += 1usize;

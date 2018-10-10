@@ -48,7 +48,7 @@ impl PreProcessor {
 
         let mut sample_counter = 0usize;
 
-        for sample in audio_data.into_iter() {
+        for sample in audio_data {
             if sample_counter < frame_mid_point {
                 if !third_frame_complete.is_empty() {
                     self.push_windowed_sample(sample, &mut third_frame_complete);
@@ -104,7 +104,7 @@ impl PreProcessor {
     fn process_and_add_frame(&mut self, frame: Frame) {
         self.processed_frames.push(
             self.mfcc.compute(
-                self.fft_handler.process(frame)
+                &self.fft_handler.process(frame)
             )
         );
     }

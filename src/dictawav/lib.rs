@@ -9,37 +9,36 @@ mod preprocessor;
 mod kernelcanvas;
 mod wisard;
 
-
-// KernelCanvas parameters
-const KERNELS_COUNT: usize = 3000usize;
-const KERNELS_DIMENSION: usize = 13usize;
-const OUTPUT_FACTOR: usize = 15usize;
-
-// WiSARD parameters
-const RETINA_SIZE: usize = KERNELS_COUNT * OUTPUT_FACTOR;
-const RAM_NUM_BITS: usize = 62usize;
-const USE_BLEACHING: bool = true;
-const MINIMUM_CONFIDENCE: f64 = 0.0025f64;
-const BLEACHING_THRESHOLD: u64 = 0;
-const RANDOMIZE_POSITIONS: bool = true;
-const IS_CUMULATIVE: bool = true;
-
 pub struct DictaWav {
     kernelcanvas: KernelCanvas,
     wisard: Wisard,
 }
 
 impl DictaWav {
-    pub fn new() -> DictaWav {
-        let kernelcanvas = KernelCanvas::new(KERNELS_COUNT, KERNELS_DIMENSION, OUTPUT_FACTOR);
+    pub fn new(kernelcanvas_kernels_count: usize,
+               kernelcanvas_kernels_dimension: usize,
+               kernelcanvas_output_factor: usize,
+               wisard_retina_size: usize,
+               wisard_ram_num_bits: usize,
+               wisard_use_bleaching: bool,
+               wisard_minimum_confidence: f64,
+               wisard_bleaching_threshold: u64,
+               wisard_randomize_positions: bool,
+               wisard_is_cumulative: bool,
+    ) -> DictaWav {
+        let kernelcanvas = KernelCanvas::new(
+            kernelcanvas_kernels_count,
+            kernelcanvas_kernels_dimension,
+            kernelcanvas_output_factor,
+        );
         let wisard = Wisard::new(
-            RETINA_SIZE,
-            RAM_NUM_BITS,
-            USE_BLEACHING,
-            MINIMUM_CONFIDENCE,
-            BLEACHING_THRESHOLD,
-            RANDOMIZE_POSITIONS,
-            IS_CUMULATIVE,
+            wisard_retina_size,
+            wisard_ram_num_bits,
+            wisard_use_bleaching,
+            wisard_minimum_confidence,
+            wisard_bleaching_threshold,
+            wisard_randomize_positions,
+            wisard_is_cumulative,
         );
 
         DictaWav {
@@ -53,7 +52,7 @@ impl DictaWav {
         self.wisard.train(class_name, &painted_canvas);
     }
 
-    pub fn forget<P: AsRef<path::Path>>(&mut self, wav_file: P, class_name: String) {
+    pub fn forget<P: AsRef<path::Path>>(&mut self, wav_file: P, class_name: &str) {
         let painted_canvas = self.read_and_process_wav_file(wav_file);
         self.wisard.forget(class_name, &painted_canvas);
     }

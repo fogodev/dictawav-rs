@@ -22,7 +22,7 @@ impl FFTHandler {
     }
 
     pub fn process(&mut self, input: Vec<f64>) -> Vec<f64> {
-        for num in input.into_iter() {
+        for num in input {
             self.input.push(Complex::new(num, 0f64))
         }
 

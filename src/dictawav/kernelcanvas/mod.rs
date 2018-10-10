@@ -88,27 +88,27 @@ impl KernelCanvas {
         let mut means = vec![0f64; doubled_kernel_dimension];
         let mut std_deviations = vec![0f64; doubled_kernel_dimension];
 
-        for frame in self.processed_frames.iter() {
+        for frame in &self.processed_frames {
             for (index, num) in means.iter_mut().enumerate() {
                 *num += frame[index];
             }
         }
 
-        for mean in means.iter_mut() {
+        for mean in &mut means {
             *mean /= processed_frames_count as f64; // Calculating the mean of each dimension
         }
 
-        for frame in self.processed_frames.iter() {
+        for frame in &self.processed_frames {
             for (index, num) in std_deviations.iter_mut().enumerate() {
                 *num += (frame[index] - means[index]).powf(2f64);
             }
         }
 
-        for std_deviation in std_deviations.iter_mut() {
+        for std_deviation in &mut std_deviations {
             *std_deviation /= (processed_frames_count - 1usize) as f64;
         }
 
-        for frame in self.processed_frames.iter() {
+        for frame in &self.processed_frames {
             let mut zscored_frame = Vec::with_capacity(doubled_kernel_dimension);
             for index in 0..doubled_kernel_dimension {
                 zscored_frame.push(
@@ -153,7 +153,7 @@ impl KernelCanvas {
 
     fn paint_canvas(&mut self) {
         let mut active_kernels = vec![false; self.kernel_count];
-        for frame in self.processed_frames.iter() {
+        for frame in &self.processed_frames {
             active_kernels[self.get_nearest_kernel_index(frame.clone())] = true;
         }
 
@@ -161,7 +161,7 @@ impl KernelCanvas {
     }
 
     fn clean_canvas(&mut self) {
-        for active in self.active_kernels.iter_mut() {
+        for active in &mut self.active_kernels {
             *active = false;
         }
     }

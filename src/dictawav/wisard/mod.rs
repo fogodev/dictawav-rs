@@ -50,7 +50,7 @@ impl Wisard {
         }
     }
 
-    pub fn train(&mut self, class_name: String, retina: &Vec<bool>) {
+    pub fn train(&mut self, class_name: String, retina: &[bool]) {
         // Checking if class name exist before creating a new one
         self.discriminators.entry(class_name).or_insert(Discriminator::new(
             self.retina_size,
@@ -60,19 +60,19 @@ impl Wisard {
         )).train(retina);
     }
 
-    pub fn forget(&mut self, class_name: String, retina: &Vec<bool>) {
-        if let Some(discriminator) = self.discriminators.get_mut(&class_name) {
+    pub fn forget(&mut self, class_name: &str, retina: &[bool]) {
+        if let Some(discriminator) = self.discriminators.get_mut(class_name) {
             discriminator.forget(retina);
         }
     }
 
-    pub fn classification_probabilities(&self, retina: &Vec<bool>) -> HashMap<String, f64> {
+    pub fn classification_probabilities(&self, retina: &[bool]) -> HashMap<String, f64> {
         let mut results = HashMap::with_capacity(self.discriminators.len());
         let mut rams_results = HashMap::with_capacity(self.discriminators.len());
 
         let rams_count = (self.retina_size as f64 / self.ram_num_bits as f64).ceil();
 
-        for (class_name, discriminator) in self.discriminators.iter() {
+        for (class_name, discriminator) in &self.discriminators {
             let ram_result = discriminator.classify(retina);
 
             // Counting how many rams have positive results
@@ -84,23 +84,23 @@ impl Wisard {
         }
 
         if self.use_bleaching {
-            results = self.apply_bleaching(results, rams_results, rams_count);
+            results = self.apply_bleaching(results, &rams_results, rams_count);
         }
 
         results
     }
 
-    pub fn classify(&self, retina: &Vec<bool>) -> String {
+    pub fn classify(&self, retina: &[bool]) -> String {
         let (_, (class_name, _)) = self.classification_confidence_and_probability(retina);
         class_name
     }
 
-    pub fn classification_and_probability(&self, retina: &Vec<bool>) -> (String, f64) {
+    pub fn classification_and_probability(&self, retina: &[bool]) -> (String, f64) {
         let (_, best_class) = self.classification_confidence_and_probability(retina);
         best_class
     }
 
-    pub fn classification_confidence_and_probability(&self, retina: &Vec<bool>) -> (f64, (String, f64)) {
+    pub fn classification_confidence_and_probability(&self, retina: &[bool]) -> (f64, (String, f64)) {
         let (confidence, best_class) = self.calculate_confidence(&self.classification_probabilities(retina));
         if confidence < self.minimum_confidence {
             return (0f64, (String::from("Not enough confidence to decide"), 0f64))
@@ -111,7 +111,7 @@ impl Wisard {
     fn apply_bleaching(
         &self,
         results: HashMap<String, f64>,
-        rams_results: HashMap<String, Vec<u64>>,
+        rams_results: &HashMap<String, Vec<u64>>,
         rams_count: f64
     ) -> HashMap<String, f64> {
         let mut bleached_results = results.clone();
@@ -121,7 +121,7 @@ impl Wisard {
         while confidence < self.minimum_confidence {
             let mut max_value = 0f64;
 
-            for (class_name, result) in bleached_results.iter_mut() {
+            for (class_name, result) in &mut bleached_results {
                 let summed_ram_values = rams_results[class_name]
                     .iter()
                     .filter(|&value| *value > current_bleaching_threshold )
@@ -135,7 +135,7 @@ impl Wisard {
             }
 
             // If no ram recognizes the pattern, return previous results
-            if max_value <= 0.000001 {
+            if max_value <= 0.000_001 {
                 return results;
             }
 
